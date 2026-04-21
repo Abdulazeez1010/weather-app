@@ -4,7 +4,7 @@ import './SearchBar.css'
 const SearchBar: React.FC = () => {
     return (
       <div className='flex justify-center text-white'>
-        <form action="search">
+        <form className="flex gap-4">
           <input
             type="text"
             name=""
@@ -14,7 +14,7 @@ const SearchBar: React.FC = () => {
           />
           <button
             type='submit'
-            className="h-10 rounded-lg bg-[hsl(233,67%,56%)] px-4 ml-4 text-white"
+            className="h-10 rounded-lg px-4 bg-[hsl(233,67%,56%)] text-white"
           >
             Search
           </button>
