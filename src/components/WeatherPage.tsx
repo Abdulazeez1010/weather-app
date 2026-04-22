@@ -6,29 +6,14 @@ import UnitsSelector from './UnitsSelector';
 import WeatherStatCard from './WeatherStatCard.tsx';
 import DailyForecastCard from './DailyForecastCard.tsx';
 import HourlyForecastCard from './HourlyForecastCard.tsx';
+import InfoCard from './InfoCard.tsx';
+import type {
+  CurrentWeather,
+  DailyForecastItem,
+  HourlyForecastItem,
+} from '../types/weather'
 
 import './WeatherPage.css';
-
-export type CurrentWeather = {
-  country: string;
-  city: string;
-  date: string;
-  temp: string;
-  feelsLike: string;
-  humidity: string;
-  wind: string;
-  precipitation: string;
-}
-
-export type DailyForecastItem = {
-  day: string;
-  temp: string;
-}
-
-export type HourlyForecastItem = {
-  hour: string;
-  temp: string;
-}
 
 const WeatherPage: React.FC = () => {
 
@@ -80,19 +65,18 @@ const WeatherPage: React.FC = () => {
 
         {/* Main weather grid */}
         <div className="grid gap-6">
-          <div className='rounded-2xl bg-blue-500 p-6 text-center text-white'>
+          <InfoCard className='bg-blue-500 text-center'>
             <p>{currentWeather.city}, {currentWeather.country}</p>
             <p>{currentWeather.date}</p>
             <h2 className='text-3xl font-semibold'>{currentWeather.temp}</h2>
-          </div>
+          </InfoCard>
 
           <WeatherStatCard currentWeather={currentWeather} />
-          
           <DailyForecastCard dailyForecast={dailyForecast} />
         </div>
 
         {/* Hourly forecast grid */}
-        <div className="grid rounded-xl bg-[hsl(243,27%,20%)] text-white">
+        <InfoCard className="grid">
           <div className='flex items-center justify-between gap-4 p-4'>
             <h3 className='text-lg font-semibold'>Hourly forecast</h3>
             <select className="rounded bg-[hsl(243,27%,30%)] p-2 text-white">
@@ -107,7 +91,7 @@ const WeatherPage: React.FC = () => {
           </div>
 
           <HourlyForecastCard hourlyForecast={hourlyForecast} />
-        </div>
+        </InfoCard>
       </section>
     </>
   );
