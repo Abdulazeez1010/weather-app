@@ -7,6 +7,9 @@ import WeatherStatCard from './WeatherStatCard.tsx';
 import DailyForecastCard from './DailyForecastCard.tsx';
 import HourlyForecastCard from './HourlyForecastCard.tsx';
 import InfoCard from './InfoCard.tsx';
+
+import BgTodayLarge from '../assets/images/bg-today-large.svg';
+
 import type {
   CurrentWeather,
   DailyForecastItem,
@@ -50,7 +53,7 @@ const WeatherPage: React.FC = () => {
   ]
 
   return (
-    <>
+    <div className='p-4 md:p-6 lg:px-20'>
       <nav className="flex items-center justify-between p-4">
         <img src={Logo} alt="Weather App Logo" />
         <UnitsSelector />
@@ -61,14 +64,24 @@ const WeatherPage: React.FC = () => {
 
       <SearchBar />
 
-      <section className="mt-4 grid gap-4 lg:grid-cols-[2fr_1fr]">
+      <section className="mt-4 grid gap-6 lg:grid-cols-[2fr_1fr]">
 
         {/* Main weather grid */}
         <div className="grid gap-6">
-          <InfoCard className='bg-blue-500 text-center'>
-            <p>{currentWeather.city}, {currentWeather.country}</p>
-            <p>{currentWeather.date}</p>
-            <h2 className='text-3xl font-semibold'>{currentWeather.temp}</h2>
+          <InfoCard className='relative overflow-hidden text-center text-white'>
+            <img
+              src={BgTodayLarge}
+              alt=""
+              className='absolute inset-0 h-full w-full object-cover'
+            />
+            <div className='relative z-10 flex items-start justify-between py-16 px-2'>
+              <div>
+                <p className='text-lg font-bold opacity-80'>{currentWeather.city}, {currentWeather.country}</p>
+                <p className='text-xs opacity-70'>{currentWeather.date}</p>
+              </div>
+              <h2 className='text-4xl font-semibold leading-none'>{currentWeather.temp}</h2>
+            </div>
+            
           </InfoCard>
 
           <WeatherStatCard currentWeather={currentWeather} />
@@ -93,7 +106,7 @@ const WeatherPage: React.FC = () => {
           <HourlyForecastCard hourlyForecast={hourlyForecast} />
         </InfoCard>
       </section>
-    </>
+    </div>
   );
 };
 

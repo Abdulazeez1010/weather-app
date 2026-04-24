@@ -11,8 +11,8 @@ const DailyForecastCard: React.FC<DailyForecastCardProps> = ({ dailyForecast }) 
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
       {dailyForecast.map((day) => (
         <InfoCard key={day.day} className='text-center'>
-          <p className='text-sm opacity-80'>{day.day}</p>
-          <h3 className='mt-2 text-lg font-semibold'>{day.temp}</h3>
+          <p className='text-xs opacity-80'>{day.day}</p>
+          <h3 className='mt-2 text-lg'>{day.temp}</h3>
         </InfoCard>
       ))}
     </div>
