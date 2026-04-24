@@ -1,3 +1,12 @@
+export type WeatherCondition =
+  | 'sunny'
+  | 'rain'
+  | 'cloudy'
+  | 'storm'
+  | 'snow'
+  | 'fog'
+  | 'drizzle';
+
 export type CurrentWeather = {
   country: string;
   city: string;
@@ -11,10 +20,13 @@ export type CurrentWeather = {
 
 export type DailyForecastItem = {
   day: string;
-  temp: string;
+  condition: WeatherCondition;
+  high: string;
+  low: string;
 }
 
 export type HourlyForecastItem = {
   hour: string;
+  condition: WeatherCondition;
   temp: string;
 }

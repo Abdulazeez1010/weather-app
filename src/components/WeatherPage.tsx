@@ -9,6 +9,7 @@ import HourlyForecastCard from './HourlyForecastCard.tsx';
 import InfoCard from './InfoCard.tsx';
 
 import BgTodayLarge from '../assets/images/bg-today-large.svg';
+import { weatherIcons } from '../utils/weatherIcons.ts';
 
 import type {
   CurrentWeather,
@@ -24,32 +25,32 @@ const WeatherPage: React.FC = () => {
     country: 'Nigeria',
     city: 'Ibadan',
     date: 'Tuesday, 21 April',
-    temp: '29°C',
-    feelsLike: '31°C',
+    temp: '29°',
+    feelsLike: '31°',
     humidity: '84%',
-    wind: '12 km/h',
-    precipitation: '20%',
+    wind: '12 mph',
+    precipitation: '20 in',
   };
 
   const dailyForecast: DailyForecastItem[] = [
-    {day: 'Sun', temp: '20°C'},
-    {day: 'Mon', temp: '21°C'},
-    {day: 'Tue', temp: '22°C'},
-    {day: 'Wed', temp: '23°C'},
-    {day: 'Thu', temp: '24°C'},
-    {day: 'Fri', temp: '25°C'},
-    {day: 'Sat', temp: '26°C'},
+    {day: 'Sun', condition: 'sunny', high: '28°', low: '20°'},
+    {day: 'Mon', condition: 'sunny', high: '28°', low: '21°'},
+    {day: 'Tue', condition: 'sunny', high: '27°', low: '22°'},
+    {day: 'Wed', condition: 'sunny', high: '30°', low: '23°'},
+    {day: 'Thu', condition: 'sunny', high: '29°', low: '24°'},
+    {day: 'Fri', condition: 'sunny', high: '32°', low: '25°'},
+    {day: 'Sat', condition: 'sunny', high: '30°', low: '26°'},
   ]
 
   const hourlyForecast: HourlyForecastItem[] = [
-    {hour: '3 PM', temp: '34°C'},
-    {hour: '4 PM', temp: '34°C'},
-    {hour: '5 PM', temp: '35°C'},
-    {hour: '6 PM', temp: '36°C'},
-    {hour: '7 PM', temp: '36°C'},
-    {hour: '8 PM', temp: '37°C'},
-    {hour: '9 PM', temp: '38°C'},
-    {hour: '10 PM', temp: '38°C'},
+    {hour: '3 PM', condition:'sunny', temp: '34°'},
+    {hour: '4 PM', condition:'sunny', temp: '34°'},
+    {hour: '5 PM', condition:'sunny', temp: '35°'},
+    {hour: '6 PM', condition:'sunny', temp: '36°'},
+    {hour: '7 PM', condition:'sunny', temp: '36°'},
+    {hour: '8 PM', condition:'sunny', temp: '37°'},
+    {hour: '9 PM', condition:'sunny', temp: '38°'},
+    {hour: '10 PM', condition:'sunny', temp: '38°'},
   ]
 
   return (
@@ -79,7 +80,10 @@ const WeatherPage: React.FC = () => {
                 <p className='text-lg font-bold opacity-80'>{currentWeather.city}, {currentWeather.country}</p>
                 <p className='text-xs opacity-70'>{currentWeather.date}</p>
               </div>
-              <h2 className='text-4xl font-semibold leading-none'>{currentWeather.temp}</h2>
+              <div className='flex items-center'>
+                <img src={weatherIcons.sunny} alt="sunny icon" className='w-20 h-20'/>
+                <h2 className='text-5xl font-semibold leading-none italic'>{currentWeather.temp}</h2>
+              </div>
             </div>
             
           </InfoCard>

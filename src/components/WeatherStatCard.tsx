@@ -18,7 +18,10 @@ const WeatherStatCard: React.FC<WeatherStatCardProps> = ({ currentWeather }) => 
       {stats.map((stat) => (
         <InfoCard key={stat.label}>
           <p className="text-xs opacity-80">{stat.label}</p>
-          <h3 className="mt-2 text-lg">{stat.value}</h3>
+          <div className="mt-2 flex items-center gap-2">
+            <h3 className="text-lg">{stat.value}</h3>
+          </div>
+          
         </InfoCard>
       ))}
     </div>

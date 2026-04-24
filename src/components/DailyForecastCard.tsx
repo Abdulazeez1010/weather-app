@@ -1,6 +1,7 @@
 import React from 'react'
 import type { DailyForecastItem } from '../types/weather';
 import InfoCard from './InfoCard';
+import { weatherIcons } from '../utils/weatherIcons';
 
 type DailyForecastCardProps = {
   dailyForecast: DailyForecastItem[];
@@ -12,7 +13,15 @@ const DailyForecastCard: React.FC<DailyForecastCardProps> = ({ dailyForecast }) 
       {dailyForecast.map((day) => (
         <InfoCard key={day.day} className='text-center'>
           <p className='text-xs opacity-80'>{day.day}</p>
-          <h3 className='mt-2 text-lg'>{day.temp}</h3>
+          <img
+            src={weatherIcons[day.condition]}
+            alt={day.condition}
+            className='mx-auto my-3 h-10 w-10'
+          />
+          <div className='flex items-center justify-between gap-2'>
+            <span className='text-xs'>{day.high}</span>
+            <span className='opacity-70 text-xs'>{day.low}</span>
+          </div>
         </InfoCard>
       ))}
     </div>
