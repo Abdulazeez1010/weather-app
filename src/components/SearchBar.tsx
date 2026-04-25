@@ -1,22 +1,40 @@
 import React from 'react';
-import './SearchBar.css'
+import './SearchBar.css';
 
-const SearchBar: React.FC = () => {
+type SearchBarProps = {
+    query: string;
+    onQueryChange: (value: string) => void;
+    onSearch: () => void;
+    isSearching: boolean;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({
+  query,
+  onQueryChange,
+  onSearch,
+  isSearching,
+}) => {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onSearch();
+  };
+
     return (
       <div className='flex justify-center text-white'>
-        <form className="flex gap-4">
+        <form onSubmit={handleSubmit} className="flex gap-4">
           <input
             type="text"
-            name=""
-            id=""
+            name={query}
+            onChange={(event) => onQueryChange(event.target.value)}
             placeholder="Search for a place..."
-            className="h-10 rounded-lg px-4 w-75 bg-[hsl(243,27%,20%)]"
+            className="h-11 flex-1 rounded-lg px-4 w-75 bg-[hsl(243,27%,20%)]"
           />
           <button
             type='submit'
-            className="h-10 rounded-lg px-4 bg-[hsl(233,67%,56%)] text-white"
+            disabled={isSearching}
+            className="h-11 rounded-lg px-4 bg-[hsl(233,67%,56%)] text-white"
           >
-            Search
+            {isSearching ? 'Searching...' : 'Search'}
           </button>
         </form>
       </div>

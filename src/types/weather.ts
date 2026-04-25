@@ -16,6 +16,7 @@ export type CurrentWeather = {
   humidity: string;
   wind: string;
   precipitation: string;
+  condition: WeatherCondition;
 }
 
 export type DailyForecastItem = {

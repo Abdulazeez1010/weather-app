@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Logo from '../assets/images/logo.svg';
 import SearchBar from './SearchBar';
@@ -19,39 +19,205 @@ import type {
 
 import './WeatherPage.css';
 
-const WeatherPage: React.FC = () => {
+const mapWeatherCodeToCondition = (code: number): WeatherCondition => {
+  if (code === 0) return 'sunny';
+  if ([1, 2, 3].includes(code)) return 'cloudy';
+  if ([45, 48].includes(code)) return 'fog';
+  if ([51, 53, 55].includes(code)) return 'drizzle';
+  if ([61, 63, 65, 80, 81, 82].includes(code)) return 'rain';
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return 'snow';
+  if ([95, 96, 99].includes(code)) return 'storm';
 
-  const currentWeather: CurrentWeather = {
-    country: 'Nigeria',
-    city: 'Ibadan',
-    date: 'Tuesday, 21 April',
-    temp: '29°',
-    feelsLike: '31°',
-    humidity: '84%',
-    wind: '12 mph',
-    precipitation: '20 in',
+  return 'cloudy';
+};
+
+const mapWeatherData = (
+  data: any,
+  location: {name: string; country: string}
+): {
+  current: CurrentWeather;
+  daily: DailyForecastItem[];
+  hourly: HourlyForecastItem[];
+} => {
+  const current: CurrentWeather = {
+    city: location.name,
+    country: location.country,
+    date: new Date().toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    }),
+    temp: `${Math.round(data.current.temperature_2m)}°`,
+    feelsLike: `${Math.round(data.current.apparent_temperature)}°`,
+    humidity: `${data.current.relative_humidity_2m}%`,
+    wind: `${Math.round(data.current.wind_speed_10m)} km/h`,
+    precipitation: `${data.current.precipitation} mm`,
+    condition: mapWeatherCodeToCondition(data.current.weather_code),
   };
 
-  const dailyForecast: DailyForecastItem[] = [
-    {day: 'Sun', condition: 'sunny', high: '28°', low: '20°'},
-    {day: 'Mon', condition: 'sunny', high: '28°', low: '21°'},
-    {day: 'Tue', condition: 'sunny', high: '27°', low: '22°'},
-    {day: 'Wed', condition: 'sunny', high: '30°', low: '23°'},
-    {day: 'Thu', condition: 'sunny', high: '29°', low: '24°'},
-    {day: 'Fri', condition: 'sunny', high: '32°', low: '25°'},
-    {day: 'Sat', condition: 'sunny', high: '30°', low: '26°'},
-  ]
+  const daily: DailyForecastItem[] = data.daily.time.map(
+    (day: string, index: number) => ({
+      day: new Date(day).toLocaleDateString('en-GB', {weekday: 'short'}),
+      condition: mapWeatherCodeToCondition(data.daily.weather_code[index]),
+      high: `${Math.round(data.daily.temperature_2m_max[index])}°`,
+      low: `${Math.round(data.daily.temperature_2m_min[index])}°`,
+    })
+  );
 
-  const hourlyForecast: HourlyForecastItem[] = [
-    {hour: '3 PM', condition:'sunny', temp: '34°'},
-    {hour: '4 PM', condition:'sunny', temp: '34°'},
-    {hour: '5 PM', condition:'sunny', temp: '35°'},
-    {hour: '6 PM', condition:'sunny', temp: '36°'},
-    {hour: '7 PM', condition:'sunny', temp: '36°'},
-    {hour: '8 PM', condition:'sunny', temp: '37°'},
-    {hour: '9 PM', condition:'sunny', temp: '38°'},
-    {hour: '10 PM', condition:'sunny', temp: '38°'},
-  ]
+  const hourly: HourlyForecastItem[] = data.hourly.time
+    .slice(0, 8)
+    .map((time: string, index: number) => ({
+      hour: new Date(time).toLocaleTimeString('en-GB', {
+        hour: 'numeric',
+      }),
+      condition: mapWeatherCodeToCondition(data.hourly.weather_code[index]),
+      temp: `${Math.round(data.hourly.temperature_2m[index])}°`,
+    }));
+  
+  return {current, daily, hourly};
+};
+
+const WeatherPage: React.FC = () => {
+
+  const [query, setQuery] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState<null | {
+    name: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+  }>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+
+  const [weatherData, setWeatherData] = useState<null | {
+    current: CurrentWeather;
+    daily: DailyForecastItem[];
+    hourly: HourlyForecastItem[];
+  }>(null);
+
+  const [isLoadingWeather, setIsLoadingWeather] = useState(false);
+  const [weatherError, setWeatherError] = useState('');
+
+  const fetchWeather = async (
+    latitude: number,
+    longitude: number,
+    location: {name: string; country: string}
+  ) => {
+    try {
+      setIsLoadingWeather(true);
+      setWeatherError('');
+
+      const params = new URLSearchParams({
+        latitude: String(latitude),
+        longitude: String(longitude),
+        current: [
+          'temperature_2m',
+          'apparent_temperature',
+          'relative_humidity_2m',
+          'precipitation',
+          'weather_code',
+          'wind_speed_10m',
+        ].join(','),
+        daily: [
+          'weather_code',
+          'temperature_2m_max',
+          'temperature_2m_min',
+        ].join(','),
+        hourly: [
+          'temperature_2m',
+          'weather_code',
+        ].join(','),
+        forecast_days: '7',
+        timezone: 'auto',
+      });
+
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?${params.toString()}`
+      );
+
+      // const response = await fetch(
+      //   `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=weather_code,temperature_2m&current=temperature_2m,apparent_temperature,precipitation,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto&past_days=0&forecast_days=7`
+      // );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch weather data');
+      }
+
+      const data = await response.json();
+      
+      // console.log(data);
+      if (!selectedLocation) return;
+
+      const mapped = mapWeatherData(data, location);
+
+      setWeatherData(mapped);
+      // console.log(mapped);
+
+    } catch (error) {
+      setWeatherError('Unable to load weather data.');
+    } finally {
+      setIsLoadingWeather(false);
+    }
+  };
+
+  const handleSearch = async () => {
+    const trimmed = query.trim();
+
+    if (!trimmed) return;
+
+    try {
+      setIsSearching(true);
+      setSearchError('');
+
+      const response = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmed)}&count=1&language=en&format=json`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to search location')
+      }
+
+      const data = await response.json();
+
+      if (!data.results || data.results.length === 0) {
+        setSelectedLocation(null);
+        setSearchError('No matching location found.');
+        return;
+      }
+
+      const location = data.results[0];
+
+      setSelectedLocation({
+        name: location.name,
+        country: location.country,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    } catch (error) {
+      setSearchError('Something went wrong while searching.');
+      setSelectedLocation(null);
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+
+  useEffect(() => {
+    if (!selectedLocation) return;
+
+    fetchWeather(
+      selectedLocation.latitude,
+      selectedLocation.longitude,
+      {
+        name: selectedLocation.name,
+        country: selectedLocation.country,
+      }
+    );
+  }, [selectedLocation]);
+
+  const currentWeather = weatherData?.current;
+  const dailyForecast = weatherData?.daily ?? [];
+  const hourlyForecast = weatherData?.hourly ?? [];
 
   return (
     <div className='p-4 md:p-6 lg:px-20'>
@@ -63,53 +229,79 @@ const WeatherPage: React.FC = () => {
         <h1>How&apos;s the sky looking today?</h1>
       </header>
 
-      <SearchBar />
+      <SearchBar
+        query={query}
+        onQueryChange={setQuery}
+        onSearch={handleSearch}
+        isSearching={isSearching}
+      />
 
-      <section className="mt-4 grid gap-6 lg:grid-cols-[2fr_1fr]">
+      {searchError && <p className='mt-4 text-red-400'>{searchError}</p>}
+      {weatherError && <p className='mt-4 text-red-400'>{weatherError}</p>}
+      {isLoadingWeather && <p className='mt-4 text-white'>Loading weather...</p>}
 
-        {/* Main weather grid */}
-        <div className="grid gap-6">
-          <InfoCard className='relative overflow-hidden text-center text-white'>
-            <img
-              src={BgTodayLarge}
-              alt=""
-              className='absolute inset-0 h-full w-full object-cover'
-            />
-            <div className='relative z-10 flex items-start justify-between py-16 px-2'>
-              <div>
-                <p className='text-lg font-bold opacity-80'>{currentWeather.city}, {currentWeather.country}</p>
-                <p className='text-xs opacity-70'>{currentWeather.date}</p>
+      {/* {selectedLocation && (
+        <p className='mt-4 text-white'>
+          {selectedLocation.name}, {selectedLocation.country} (
+            {selectedLocation.latitude}, {selectedLocation.longitude}
+          )
+        </p>
+      )} */}
+
+      {currentWeather && (
+        <section className="mt-4 grid gap-6 lg:grid-cols-[2fr_1fr]">
+
+          {/* Main weather grid */}
+          <div className="grid gap-6">
+            <InfoCard className='relative overflow-hidden text-center text-white'>
+              <img
+                src={BgTodayLarge}
+                alt=""
+                className='absolute inset-0 h-full w-full object-cover'
+              />
+              <div className='relative z-10 flex items-start justify-between py-16 px-2'>
+                <div>
+                  {/* <p className='text-lg font-bold opacity-80'>{currentWeather.city}, {currentWeather.country}</p> */}
+                  <p className='text-lg font-bold opacity-80'>{currentWeather?.city}, {currentWeather?.country}</p>
+                  <p className='text-xs opacity-70'>{currentWeather?.date}</p>
+                </div>
+                <div className='flex items-center'>
+                  <img
+                    src={weatherIcons[currentWeather.condition]}
+                    alt={currentWeather.condition}
+                    className='w-20 h-20'
+                  />
+                  <h2 className='text-5xl font-semibold leading-none italic'>
+                    {currentWeather?.temp}
+                  </h2>
+                </div>
               </div>
-              <div className='flex items-center'>
-                <img src={weatherIcons.sunny} alt="sunny icon" className='w-20 h-20'/>
-                <h2 className='text-5xl font-semibold leading-none italic'>{currentWeather.temp}</h2>
-              </div>
-            </div>
-            
-          </InfoCard>
+              
+            </InfoCard>
 
-          <WeatherStatCard currentWeather={currentWeather} />
-          <DailyForecastCard dailyForecast={dailyForecast} />
-        </div>
-
-        {/* Hourly forecast grid */}
-        <InfoCard className="grid">
-          <div className='flex items-center justify-between gap-4 p-4'>
-            <h3 className='text-lg font-semibold'>Hourly forecast</h3>
-            <select className="rounded bg-[hsl(243,27%,30%)] p-2 text-white">
-              <option value="sun">Sunday</option>
-              <option value="mon">Monday</option>
-              <option value="tue">Tuesday</option>
-              <option value="wed">Wednesday</option>
-              <option value="thu">Thursday</option>
-              <option value="fri">Friday</option>
-              <option value="sat">Saturday</option>
-            </select>
+            <WeatherStatCard currentWeather={currentWeather} />
+            <DailyForecastCard dailyForecast={dailyForecast} />
           </div>
 
-          <HourlyForecastCard hourlyForecast={hourlyForecast} />
-        </InfoCard>
-      </section>
+          {/* Hourly forecast grid */}
+          <InfoCard className="grid">
+            <div className='flex items-center justify-between gap-4 p-4'>
+              <h3 className='text-lg font-semibold'>Hourly forecast</h3>
+              <select className="rounded bg-[hsl(243,27%,30%)] p-2 text-white">
+                <option value="sun">Sunday</option>
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+                <option value="sat">Saturday</option>
+              </select>
+            </div>
+
+            <HourlyForecastCard hourlyForecast={hourlyForecast} />
+          </InfoCard>
+        </section>
+      )}
     </div>
   );
 };

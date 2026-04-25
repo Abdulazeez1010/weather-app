@@ -7,11 +7,12 @@ type WeatherStatCardProps = {
 }
 const WeatherStatCard: React.FC<WeatherStatCardProps> = ({ currentWeather }) => {
   const stats = [
-    {label: 'Feels like', value: currentWeather.feelsLike},
-    {label: 'Humidity', value: currentWeather.humidity},
-    {label: 'Wind', value: currentWeather.wind},
-    {label: 'Precipitation', value: currentWeather.precipitation},
+    {label: 'Feels like', value: currentWeather?.feelsLike},
+    {label: 'Humidity', value: currentWeather?.humidity},
+    {label: 'Wind', value: currentWeather?.wind},
+    {label: 'Precipitation', value: currentWeather?.precipitation},
   ];
+  // console.log(currentWeather)
 
   return (
     <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
