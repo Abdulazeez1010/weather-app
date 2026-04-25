@@ -15,6 +15,7 @@ import type {
   CurrentWeather,
   DailyForecastItem,
   HourlyForecastItem,
+  WeatherCondition,
 } from '../types/weather'
 
 import './WeatherPage.css';
@@ -57,6 +58,7 @@ const mapWeatherData = (
 
   const daily: DailyForecastItem[] = data.daily.time.map(
     (day: string, index: number) => ({
+      date: day,
       day: new Date(day).toLocaleDateString('en-GB', {weekday: 'short'}),
       condition: mapWeatherCodeToCondition(data.daily.weather_code[index]),
       high: `${Math.round(data.daily.temperature_2m_max[index])}°`,
@@ -64,12 +66,14 @@ const mapWeatherData = (
     })
   );
 
-  const hourly: HourlyForecastItem[] = data.hourly.time
-    .slice(0, 8)
-    .map((time: string, index: number) => ({
+  const hourly: HourlyForecastItem[] = data.hourly.time.map(
+    (time: string, index: number) => ({
+      date: time.split('T')[0],
+      dateTime: time,
       hour: new Date(time).toLocaleTimeString('en-GB', {
         hour: 'numeric',
-      }),
+        hour12: true,
+      }).toUpperCase(),
       condition: mapWeatherCodeToCondition(data.hourly.weather_code[index]),
       temp: `${Math.round(data.hourly.temperature_2m[index])}°`,
     }));
@@ -97,6 +101,8 @@ const WeatherPage: React.FC = () => {
 
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
   const [weatherError, setWeatherError] = useState('');
+
+  const [selectedDay, setSelectedDay] = useState('');
 
   const fetchWeather = async (
     latitude: number,
@@ -155,6 +161,7 @@ const WeatherPage: React.FC = () => {
 
     } catch (error) {
       setWeatherError('Unable to load weather data.');
+      console.log(error);
     } finally {
       setIsLoadingWeather(false);
     }
@@ -195,6 +202,7 @@ const WeatherPage: React.FC = () => {
       });
     } catch (error) {
       setSearchError('Something went wrong while searching.');
+      console.log(error);
       setSelectedLocation(null);
     } finally {
       setIsSearching(false);
@@ -215,9 +223,47 @@ const WeatherPage: React.FC = () => {
     );
   }, [selectedLocation]);
 
+  useEffect(() => {
+    if (!weatherData?.daily.length) return;
+    setSelectedDay(weatherData.daily[0].date);
+  }, [weatherData])
+
   const currentWeather = weatherData?.current;
   const dailyForecast = weatherData?.daily ?? [];
   const hourlyForecast = weatherData?.hourly ?? [];
+
+  const dayHourlyForecast = hourlyForecast.filter(
+    (item) => item.date === selectedDay
+  );
+
+  const getVisibleHourlyForecast = () => {
+    const dayHourlyForecast = hourlyForecast.filter(
+      (item) => item.date === selectedDay
+    );
+
+    if (!dayHourlyForecast.length) return [];
+
+    const today = new Date().toISOString().split('T')[0];
+
+    if (selectedDay !== today) {
+      return dayHourlyForecast.slice(0, 8);
+    }
+
+    const now = new Date();
+
+    const startIndex = dayHourlyForecast.findIndex((item) => {
+      const itemDate = new Date(item.dateTime);
+      return itemDate >= now;
+    });
+
+    if (startIndex === -1) {
+      return dayHourlyForecast.slice(-8);
+    }
+
+    return dayHourlyForecast.slice(startIndex, startIndex + 8);
+  }
+
+  const visibleHourlyForecast = getVisibleHourlyForecast();
 
   return (
     <div className='p-4 md:p-6 lg:px-20'>
@@ -286,19 +332,21 @@ const WeatherPage: React.FC = () => {
           {/* Hourly forecast grid */}
           <InfoCard className="grid">
             <div className='flex items-center justify-between gap-4 p-4'>
-              <h3 className='text-lg font-semibold'>Hourly forecast</h3>
-              <select className="rounded bg-[hsl(243,27%,30%)] p-2 text-white">
-                <option value="sun">Sunday</option>
-                <option value="mon">Monday</option>
-                <option value="tue">Tuesday</option>
-                <option value="wed">Wednesday</option>
-                <option value="thu">Thursday</option>
-                <option value="fri">Friday</option>
-                <option value="sat">Saturday</option>
+              <h3 className='text-sm font-semibold'>Hourly forecast</h3>
+              <select
+                value={selectedDay}
+                onChange={(event) => setSelectedDay(event.target.value)}
+                className="rounded bg-[hsl(243,27%,30%)] p-2 text-white"
+              >
+                {dailyForecast.map((day) => (
+                  <option key={day.date} value={day.date}>
+                    {day.day}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <HourlyForecastCard hourlyForecast={hourlyForecast} />
+            <HourlyForecastCard hourlyForecast={visibleHourlyForecast} />
           </InfoCard>
         </section>
       )}

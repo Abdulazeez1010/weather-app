@@ -20,6 +20,7 @@ export type CurrentWeather = {
 }
 
 export type DailyForecastItem = {
+  date: string;
   day: string;
   condition: WeatherCondition;
   high: string;
@@ -27,6 +28,8 @@ export type DailyForecastItem = {
 }
 
 export type HourlyForecastItem = {
+  date: string;
+  dateTime: string;
   hour: string;
   condition: WeatherCondition;
   temp: string;
