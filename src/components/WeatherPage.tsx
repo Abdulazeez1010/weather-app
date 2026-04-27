@@ -16,6 +16,7 @@ import type {
   DailyForecastItem,
   HourlyForecastItem,
   WeatherCondition,
+  UnitsState,
 } from '../types/weather'
 
 import './WeatherPage.css';
@@ -30,55 +31,6 @@ const mapWeatherCodeToCondition = (code: number): WeatherCondition => {
   if ([95, 96, 99].includes(code)) return 'storm';
 
   return 'cloudy';
-};
-
-const mapWeatherData = (
-  data: any,
-  location: {name: string; country: string}
-): {
-  current: CurrentWeather;
-  daily: DailyForecastItem[];
-  hourly: HourlyForecastItem[];
-} => {
-  const current: CurrentWeather = {
-    city: location.name,
-    country: location.country,
-    date: new Date().toLocaleDateString('en-GB', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    }),
-    temp: `${Math.round(data.current.temperature_2m)}°`,
-    feelsLike: `${Math.round(data.current.apparent_temperature)}°`,
-    humidity: `${data.current.relative_humidity_2m}%`,
-    wind: `${Math.round(data.current.wind_speed_10m)} km/h`,
-    precipitation: `${data.current.precipitation} mm`,
-    condition: mapWeatherCodeToCondition(data.current.weather_code),
-  };
-
-  const daily: DailyForecastItem[] = data.daily.time.map(
-    (day: string, index: number) => ({
-      date: day,
-      day: new Date(day).toLocaleDateString('en-GB', {weekday: 'short'}),
-      condition: mapWeatherCodeToCondition(data.daily.weather_code[index]),
-      high: `${Math.round(data.daily.temperature_2m_max[index])}°`,
-      low: `${Math.round(data.daily.temperature_2m_min[index])}°`,
-    })
-  );
-
-  const hourly: HourlyForecastItem[] = data.hourly.time.map(
-    (time: string, index: number) => ({
-      date: time.split('T')[0],
-      dateTime: time,
-      hour: new Date(time).toLocaleTimeString('en-GB', {
-        hour: 'numeric',
-        hour12: true,
-      }).toUpperCase(),
-      condition: mapWeatherCodeToCondition(data.hourly.weather_code[index]),
-      temp: `${Math.round(data.hourly.temperature_2m[index])}°`,
-    }));
-  
-  return {current, daily, hourly};
 };
 
 const WeatherPage: React.FC = () => {
@@ -103,6 +55,67 @@ const WeatherPage: React.FC = () => {
   const [weatherError, setWeatherError] = useState('');
 
   const [selectedDay, setSelectedDay] = useState('');
+
+  const [units, setUnits] = useState<UnitsState>({
+    temperature: 'celsius',
+    windspeed: 'kmh',
+    precipitation: 'mm',
+  });
+
+  const temperatureSymbol = units.temperature === 'celsius' ? '°C' : '°F';
+  const windUnitLabel = units.windspeed === 'kmh' ? 'km/h' : 'mph';
+  const precipitationUnitLabel = units.precipitation === 'mm' ? 'mm' : 'in';
+
+  const mapWeatherData = (
+    data: any,
+    location: {name: string; country: string}
+  ): {
+    current: CurrentWeather;
+    daily: DailyForecastItem[];
+    hourly: HourlyForecastItem[];
+  } => {
+    const current: CurrentWeather = {
+      city: location.name,
+      country: location.country,
+      date: new Date().toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      }),
+      temp: `${Math.round(data.current.temperature_2m)}${temperatureSymbol}`,
+      feelsLike: `${Math.round(data.current.apparent_temperature)}${temperatureSymbol}`,
+      humidity: `${data.current.relative_humidity_2m}%`,
+      wind: `${Math.round(data.current.wind_speed_10m)} ${windUnitLabel}`,
+      precipitation: `${data.current.precipitation} ${precipitationUnitLabel}`,
+      condition: mapWeatherCodeToCondition(data.current.weather_code),
+    };
+
+    const daily: DailyForecastItem[] = data.daily.time.map(
+      (day: string, index: number) => ({
+        date: day,
+        day: new Date(day).toLocaleDateString('en-GB', {weekday: 'short'}),
+        fullDay: new Date(day).toLocaleDateString('en-GB', {weekday: 'long'}),
+        condition: mapWeatherCodeToCondition(data.daily.weather_code[index]),
+        high: `${Math.round(data.daily.temperature_2m_max[index])}${temperatureSymbol}`,
+        low: `${Math.round(data.daily.temperature_2m_min[index])}${temperatureSymbol}`,
+      })
+    );
+
+    const hourly: HourlyForecastItem[] = data.hourly.time.map(
+      (time: string, index: number) => ({
+        date: time.split('T')[0],
+        dateTime: time,
+        hour: new Date(time).toLocaleTimeString('en-GB', {
+          hour: 'numeric',
+          hour12: true,
+        }).toUpperCase(),
+        condition: mapWeatherCodeToCondition(data.hourly.weather_code[index]),
+        temp: `${Math.round(data.hourly.temperature_2m[index])}${temperatureSymbol}`,
+      }));
+    
+    return {current, daily, hourly};
+  };
+
 
   const fetchWeather = async (
     latitude: number,
@@ -135,6 +148,9 @@ const WeatherPage: React.FC = () => {
         ].join(','),
         forecast_days: '7',
         timezone: 'auto',
+        temperature_unit: units.temperature,
+        wind_speed_unit: units.windspeed,
+        precipitation_unit: units.precipitation,
       });
 
       const response = await fetch(
@@ -221,7 +237,7 @@ const WeatherPage: React.FC = () => {
         country: selectedLocation.country,
       }
     );
-  }, [selectedLocation]);
+  }, [selectedLocation, units]);
 
   useEffect(() => {
     if (!weatherData?.daily.length) return;
@@ -232,9 +248,9 @@ const WeatherPage: React.FC = () => {
   const dailyForecast = weatherData?.daily ?? [];
   const hourlyForecast = weatherData?.hourly ?? [];
 
-  const dayHourlyForecast = hourlyForecast.filter(
-    (item) => item.date === selectedDay
-  );
+  // const dayHourlyForecast = hourlyForecast.filter(
+  //   (item) => item.date === selectedDay
+  // );
 
   const getVisibleHourlyForecast = () => {
     const dayHourlyForecast = hourlyForecast.filter(
@@ -269,7 +285,8 @@ const WeatherPage: React.FC = () => {
     <div className='p-4 md:p-6 lg:px-20'>
       <nav className="flex items-center justify-between p-4">
         <img src={Logo} alt="Weather App Logo" />
-        <UnitsSelector />
+
+        <UnitsSelector units={units} onUnitsChange={setUnits} />
       </nav>
       <header className="m-10 text-center text-4xl text-white ">
         <h1>How&apos;s the sky looking today?</h1>
@@ -340,7 +357,7 @@ const WeatherPage: React.FC = () => {
               >
                 {dailyForecast.map((day) => (
                   <option key={day.date} value={day.date}>
-                    {day.day}
+                    {day.fullDay}
                   </option>
                 ))}
               </select>

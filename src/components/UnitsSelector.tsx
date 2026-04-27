@@ -1,18 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import './UnitSelector.css'
 
-const UnitsSelector: React.FC = () => {
+import CheckMark from '../assets/images/icon-checkmark.svg'
+
+import type {
+  UnitsSelectorProps,
+} from '../types/weather'
+
+const UnitsSelector: React.FC<UnitsSelectorProps> = ({
+	units,
+	onUnitsChange
+}) => {
+	const [isOpen, setIsOpen] = useState(false);
+
+	const baseOptionClass = 'flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm transition';
+	const activeOptionClass = 'bg-[hsl(243,27%,20%)] text-white';
+	const inactiveOptionClass = 'text-white/70 hover:bg-white/10';
+
+	const sections = [
+		{
+			title: 'Temperature',
+			key: 'temperature',
+			options: [
+				{label: 'Celsius (°C)', value: 'celsius'},
+				{label: 'Fahrenheit (°F)', value: 'fahrenheit'},
+			],
+		},
+		{
+			title: 'Wind Speed',
+			key: 'windspeed',
+			options: [
+				{label: 'km/h', value: 'kmh'},
+				{label: 'mph', value: 'mph'},
+			],
+		},
+		{
+			title: 'Precipitation',
+			key: 'precipitation',
+			options: [
+				{label: 'Millimeters (mm)', value: 'mm'},
+				{label: 'Inches (in)', value: 'inch'},
+			],
+		},
+	] as const;
+
 	return (
 		<>
-			<div className='text-white'>
-				<select name="units" id="units" className='bg-[hsl(243,27%,20%)] text-white py-2 px-4 rounded'>
-					<option value="">Celsius</option>
-					<option value="">Fahrenheit</option>
-				</select>
+			<div className='relative bg-[hsl(243,27%,20%)]'>
+				<button
+					type='button'
+					onClick={() => setIsOpen((prev) => !prev)}
+					className='rounded px-2 py-1 text-white'
+				>
+					Units
+				</button>
+
+				{isOpen && (
+					<div className='absolute right-0 z-20 mt-2 w-72 rounded-xl bg-[hsl(243,27%,16%)] p-4 text-white shadow-lg'>
+						<p className='mb-4 text-sm font-semibold'>Switch to Imperial</p>
+
+						{sections.map((section) => (
+							<div key={section.title} className='mb-4 last:mb-0'>
+								<h4 className='mb-2 text-xs tracking-wide text-white/60'>
+									{section.title}
+								</h4>
+
+								<div className='grid gap-2'>
+									{section.options.map((option) => {
+										const isActive = units[section.key] === option.value;
+
+										return (
+											<button
+												key={option.value}
+												type='button'
+												onClick={() =>
+													onUnitsChange((prev) => ({
+														...prev,
+														[section.key]: option.value,
+													}))
+												}
+												className={`${baseOptionClass} ${
+													isActive ? activeOptionClass : inactiveOptionClass
+												}`}
+											>
+												<span>{option.label}</span>
+												{isActive && (
+													<img
+														src={CheckMark} 
+														alt=""
+														className='w-3 h-3'
+													/>
+												)}
+											</button>
+										);
+									})}
+								</div>
+							</div>
+						))}
+					</div>
+				)}
 			</div>
 		</>
-	)
-}
+	);
+};
 
 export default UnitsSelector;
