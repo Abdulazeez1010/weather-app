@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import './UnitSelector.css'
 
 import CheckMark from '../assets/images/icon-checkmark.svg'
+import SettingsIcon from '../assets/images/icon-units.svg'
+import DropdownIcom from '../assets/images/icon-dropdown.svg'
 
 import type {
   UnitsSelectorProps,
@@ -13,8 +15,10 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 	onUnitsChange
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
+	const containerRef = useRef<HTMLDivElement | null>(null);
 
-	const baseOptionClass = 'flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm transition';
+	const baseOptionClass =
+		'flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm transition';
 	const activeOptionClass = 'bg-[hsl(243,27%,20%)] text-white';
 	const inactiveOptionClass = 'text-white/70 hover:bg-white/10';
 
@@ -45,15 +49,42 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 		},
 	] as const;
 
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (!containerRef.current) return;
+
+			if (!containerRef.current.contains(event.target as Node)) {
+				setIsOpen(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
 	return (
 		<>
-			<div className='relative bg-[hsl(243,27%,20%)]'>
+			<div 
+				ref={containerRef}
+				className='relative bg-[hsl(243,27%,20%)]'
+			>
 				<button
 					type='button'
 					onClick={() => setIsOpen((prev) => !prev)}
-					className='rounded px-2 py-1 text-white'
+					className='flex items-center gap-2 rounded px-2 py-1 text-white'
 				>
-					Units
+					<img src={SettingsIcon} alt="" className='h-4 w-4'/>
+					<span>Units</span>
+					<img
+						src={DropdownIcom}
+						alt=""
+						className={`h-3 w-3 transition-transform ${
+							isOpen ? 'rotate-180' : ''
+						}`}
+					/>
 				</button>
 
 				{isOpen && (
