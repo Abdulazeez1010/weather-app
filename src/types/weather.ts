@@ -46,3 +46,10 @@ export type UnitsSelectorProps = {
   units: UnitsState;
   onUnitsChange: React.Dispatch<React.SetStateAction<UnitsState>>;
 }
+
+export type ErrorStateProps = {
+  title: string;
+  message: string;
+  actionLabel: string;
+  onAction: () => void;
+}

@@ -7,6 +7,7 @@ import WeatherStatCard from './WeatherStatCard.tsx';
 import DailyForecastCard from './DailyForecastCard.tsx';
 import HourlyForecastCard from './HourlyForecastCard.tsx';
 import InfoCard from './InfoCard.tsx';
+import ErrorState from './ErrorState.tsx';
 
 import BgTodayLarge from '../assets/images/bg-today-large.svg';
 import { weatherIcons } from '../utils/weatherIcons.ts';
@@ -204,7 +205,7 @@ const WeatherPage: React.FC = () => {
 
       if (!data.results || data.results.length === 0) {
         setSelectedLocation(null);
-        setSearchError('No matching location found.');
+        setSearchError('No search result found!');
         return;
       }
 
@@ -223,7 +224,16 @@ const WeatherPage: React.FC = () => {
     } finally {
       setIsSearching(false);
     }
-  }
+  };
+
+  const handleRetryWeather = () => {
+    if (!selectedLocation) return;
+
+    fetchWeather(selectedLocation.latitude, selectedLocation.longitude, {
+      name: selectedLocation.name,
+      country: selectedLocation.country,
+    });
+  };
 
 
   useEffect(() => {
@@ -281,6 +291,16 @@ const WeatherPage: React.FC = () => {
 
   const visibleHourlyForecast = getVisibleHourlyForecast();
 
+  // if (weatherError && selectedLocation){
+  //   return (
+  //     <ErrorState
+  //       title="Something went wrong"
+  //       message="We couldn't connect to the server (API error). Please try again in a few moments."
+  //       actionLabel="Retry"
+  //       onAction={handleRetryWeather}
+  //     />
+  //   )
+  // }
   return (
     <div className='p-4 md:p-6 lg:px-20'>
       <nav className="flex items-center justify-between p-4">
@@ -299,19 +319,26 @@ const WeatherPage: React.FC = () => {
         isSearching={isSearching}
       />
 
-      {searchError && <p className='mt-4 text-red-400'>{searchError}</p>}
-      {weatherError && <p className='mt-4 text-red-400'>{weatherError}</p>}
-      {isLoadingWeather && <p className='mt-4 text-white'>Loading weather...</p>}
-
-      {/* {selectedLocation && (
-        <p className='mt-4 text-white'>
-          {selectedLocation.name}, {selectedLocation.country} (
-            {selectedLocation.latitude}, {selectedLocation.longitude}
-          )
+      {searchError && (
+        <p className='mt-6 font-semibold text-white text-center'>
+          {searchError}
         </p>
-      )} */}
-
-      {currentWeather && (
+      )}
+      {/* {weatherError && <p className='mt-6 font-semibold text-white text-center'>{weatherError}</p>} */}
+      {isLoadingWeather ? (
+        <p className='mt-6 text-white'>
+          Loading weather...
+        </p>
+      ) : weatherError && selectedLocation ? (
+        <div className='mt-16 flex justify-center'>
+          <ErrorState
+            title="Something went wrong"
+            message="We couldn't connect to the server (API error). Please try again in a few moments."
+            actionLabel="Retry"
+            onAction={handleRetryWeather}
+          />
+        </div>
+      ) : currentWeather ? (
         <section className="mt-4 grid gap-6 lg:grid-cols-[2fr_1fr]">
 
           {/* Main weather grid */}
@@ -366,7 +393,7 @@ const WeatherPage: React.FC = () => {
             <HourlyForecastCard hourlyForecast={visibleHourlyForecast} />
           </InfoCard>
         </section>
-      )}
+      ) : null}
     </div>
   );
 };

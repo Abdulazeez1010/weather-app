@@ -69,12 +69,12 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 		<>
 			<div 
 				ref={containerRef}
-				className='relative bg-[hsl(243,27%,20%)]'
+				className='relative'
 			>
 				<button
 					type='button'
 					onClick={() => setIsOpen((prev) => !prev)}
-					className='flex items-center gap-2 rounded px-2 py-1 text-white'
+					className='flex items-center gap-2 rounded bg-[hsl(243,27%,20%)] px-2 py-1 text-white'
 				>
 					<img src={SettingsIcon} alt="" className='h-4 w-4'/>
 					<span>Units</span>
