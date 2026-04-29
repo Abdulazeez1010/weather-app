@@ -192,6 +192,9 @@ const WeatherPage: React.FC = () => {
     try {
       setIsSearching(true);
       setSearchError('');
+      setWeatherError('');
+      setWeatherData(null);
+      setSelectedDay('');
 
       const response = await fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmed)}&count=1&language=en&format=json`
@@ -205,6 +208,9 @@ const WeatherPage: React.FC = () => {
 
       if (!data.results || data.results.length === 0) {
         setSelectedLocation(null);
+        setWeatherData(null);
+        setSelectedDay('');
+        setWeatherError('');
         setSearchError('No search result found!');
         return;
       }
@@ -219,8 +225,11 @@ const WeatherPage: React.FC = () => {
       });
     } catch (error) {
       setSearchError('Something went wrong while searching.');
-      console.log(error);
+      // console.log(error);
       setSelectedLocation(null);
+      setWeatherData(null);
+      setSelectedDay('');
+      setWeatherError('');
     } finally {
       setIsSearching(false);
     }
