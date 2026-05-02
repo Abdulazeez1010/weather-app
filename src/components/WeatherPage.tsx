@@ -7,6 +7,7 @@ import WeatherStatCard from './WeatherStatCard.tsx';
 import DailyForecastCard from './DailyForecastCard.tsx';
 import HourlyForecastCard from './HourlyForecastCard.tsx';
 import InfoCard from './InfoCard.tsx';
+import WeatherSkeleton from './WeatheSkeleton.tsx';
 import ErrorState from './ErrorState.tsx';
 
 import BgTodayLarge from '../assets/images/bg-today-large.svg';
@@ -335,9 +336,7 @@ const WeatherPage: React.FC = () => {
       )}
       {/* {weatherError && <p className='mt-6 font-semibold text-white text-center'>{weatherError}</p>} */}
       {isLoadingWeather ? (
-        <p className='mt-6 text-white'>
-          Loading weather...
-        </p>
+        <WeatherSkeleton />
       ) : weatherError && selectedLocation ? (
         <div className='mt-16 flex justify-center'>
           <ErrorState
