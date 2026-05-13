@@ -6,6 +6,7 @@ import UnitsSelector from './UnitsSelector';
 import WeatherStatCard from './WeatherStatCard.tsx';
 import DailyForecastCard from './DailyForecastCard.tsx';
 import HourlyForecastCard from './HourlyForecastCard.tsx';
+import HourlyDaySelector from './HourlyDaySelector.tsx';
 import InfoCard from './InfoCard.tsx';
 import WeatherSkeleton from './WeatheSkeleton.tsx';
 import ErrorState from './ErrorState.tsx';
@@ -189,6 +190,8 @@ const WeatherPage: React.FC = () => {
     const trimmed = query.trim();
 
     if (!trimmed) return;
+
+    setQuery('');
 
     try {
       setIsSearching(true);
@@ -385,17 +388,11 @@ const WeatherPage: React.FC = () => {
           <InfoCard className="grid">
             <div className='flex items-center justify-between gap-4 p-4'>
               <h3 className='text-sm font-semibold'>Hourly forecast</h3>
-              <select
-                value={selectedDay}
-                onChange={(event) => setSelectedDay(event.target.value)}
-                className="rounded bg-[hsl(243,27%,30%)] p-2 text-white"
-              >
-                {dailyForecast.map((day) => (
-                  <option key={day.date} value={day.date}>
-                    {day.fullDay}
-                  </option>
-                ))}
-              </select>
+              <HourlyDaySelector
+                dailyForecast={dailyForecast}
+                selectedDay={selectedDay}
+                onSelectedDayChange={setSelectedDay}
+              />
             </div>
 
             <HourlyForecastCard hourlyForecast={visibleHourlyForecast} />

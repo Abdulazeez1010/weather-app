@@ -1,4 +1,7 @@
 import React from 'react';
+
+import SearchIcon from '../assets/images/icon-search.svg';
+
 import './SearchBar.css';
 
 type SearchBarProps = {
@@ -22,13 +25,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
     return (
       <div className='flex justify-center text-white'>
         <form onSubmit={handleSubmit} className="flex gap-4">
-          <input
-            type="text"
-            name={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Search for a place..."
-            className="h-11 flex-1 rounded-lg px-4 w-75 bg-[hsl(243,27%,20%)]"
-          />
+          <div className='relative flex-1'>
+            <img
+              src={SearchIcon}
+              alt=""
+              className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2'
+            />
+            <input
+              type="text"
+              name={query}
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="Search for a place..."
+              className="h-11 flex-1 rounded-lg px-4 pl-11 w-75 bg-[hsl(243,27%,20%)]"
+            />
+          </div>
+          
           <button
             type='submit'
             disabled={isSearching}

@@ -4,7 +4,7 @@ import './UnitSelector.css'
 
 import CheckMark from '../assets/images/icon-checkmark.svg'
 import SettingsIcon from '../assets/images/icon-units.svg'
-import DropdownIcom from '../assets/images/icon-dropdown.svg'
+import DropdownIcon from '../assets/images/icon-dropdown.svg'
 
 import type {
   UnitsSelectorProps,
@@ -79,7 +79,7 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 					<img src={SettingsIcon} alt="" className='h-4 w-4'/>
 					<span>Units</span>
 					<img
-						src={DropdownIcom}
+						src={DropdownIcon}
 						alt=""
 						className={`h-3 w-3 transition-transform ${
 							isOpen ? 'rotate-180' : ''
