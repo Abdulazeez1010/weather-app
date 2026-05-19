@@ -7,7 +7,7 @@ type InfoCardProps = {
 
 const InfoCard: React.FC<InfoCardProps> = ({children, className= ''}) => {
     return (
-        <div className={`rounded-xl bg-[hsl(243,27%,20%)] p-4 text-white ${className}`}>
+        <div className={`rounded-xl bg-[hsl(243,27%,20%)] p-3 md:p-4 text-white ${className}`}>
             {children}
         </div>
     );

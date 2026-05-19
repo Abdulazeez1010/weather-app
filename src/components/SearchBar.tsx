@@ -24,8 +24,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
     return (
       <div className='flex justify-center text-white'>
-        <form onSubmit={handleSubmit} className="flex gap-4">
-          <div className='relative flex-1'>
+        <form
+          onSubmit={handleSubmit}
+          className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4"
+        >
+          <div className='relative w-full sm:w-auto'>
             <img
               src={SearchIcon}
               alt=""
@@ -37,14 +40,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
               placeholder="Search for a place..."
-              className="h-11 flex-1 rounded-lg px-4 pl-11 w-75 bg-[hsl(243,27%,20%)]"
+              className="h-11 w-full rounded-lg bg-[hsl(243,27%,20%)] px-4 pl-11 sm:w-75"
             />
           </div>
           
           <button
             type='submit'
             disabled={isSearching}
-            className="h-11 rounded-lg px-4 bg-[hsl(233,67%,56%)] text-white"
+            className="h-11 w-full rounded-lg px-4 bg-[hsl(233,67%,56%)] px-4 text-white disabled:opacity-70 sm:w-auto"
           >
             {isSearching ? 'Searching...' : 'Search'}
           </button>

@@ -315,13 +315,12 @@ const WeatherPage: React.FC = () => {
   //   )
   // }
   return (
-    <div className='p-4 md:p-6 lg:px-20'>
-      <nav className="flex items-center justify-between p-4">
+    <div className='px-4 py-4 md:px-6 lg:px-20'>
+      <nav className="flex items-center justify-between py-3 md:p-4">
         <img src={Logo} alt="Weather App Logo" />
-
         <UnitsSelector units={units} onUnitsChange={setUnits} />
       </nav>
-      <header className="m-10 text-center text-4xl text-white ">
+      <header className="my-8 text-center text-2xl text-white md:text-4xl">
         <h1>How&apos;s the sky looking today?</h1>
       </header>
 
@@ -360,19 +359,18 @@ const WeatherPage: React.FC = () => {
                 alt=""
                 className='absolute inset-0 h-full w-full object-cover'
               />
-              <div className='relative z-10 flex items-start justify-between py-16 px-2'>
+              <div className='relative z-10 flex flex-col gap-6 px-2 py-12 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left'>
                 <div>
-                  {/* <p className='text-lg font-bold opacity-80'>{currentWeather.city}, {currentWeather.country}</p> */}
                   <p className='text-lg font-bold opacity-80'>{currentWeather?.city}, {currentWeather?.country}</p>
                   <p className='text-xs opacity-70'>{currentWeather?.date}</p>
                 </div>
-                <div className='flex items-center'>
+                <div className='flex justify-center items-center gap-8'>
                   <img
                     src={weatherIcons[currentWeather.condition]}
                     alt={currentWeather.condition}
                     className='w-20 h-20'
                   />
-                  <h2 className='text-5xl font-semibold leading-none italic'>
+                  <h2 className='text-4xl font-semibold leading-none italic sm:text-5xl'>
                     {currentWeather?.temp}
                   </h2>
                 </div>
@@ -386,7 +384,7 @@ const WeatherPage: React.FC = () => {
 
           {/* Hourly forecast grid */}
           <InfoCard className="grid">
-            <div className='flex items-center justify-between gap-4 p-4'>
+            <div className='flex items-center justify-between gap-4 py-4'>
               <h3 className='text-sm font-semibold'>Hourly forecast</h3>
               <HourlyDaySelector
                 dailyForecast={dailyForecast}
