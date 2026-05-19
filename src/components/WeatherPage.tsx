@@ -12,6 +12,7 @@ import WeatherSkeleton from './WeatheSkeleton.tsx';
 import ErrorState from './ErrorState.tsx';
 
 import BgTodayLarge from '../assets/images/bg-today-large.svg';
+import BgTodaySmall from '../assets/images/bg-today-small.svg';
 import { weatherIcons } from '../utils/weatherIcons.ts';
 
 import type {
@@ -317,10 +318,14 @@ const WeatherPage: React.FC = () => {
   return (
     <div className='px-4 py-4 md:px-6 lg:px-20'>
       <nav className="flex items-center justify-between py-3 md:p-4">
-        <img src={Logo} alt="Weather App Logo" />
+        <img
+          src={Logo}
+          alt="Weather App Logo"
+          className='h-6 w-auto sm:h-7 md:h-8'
+        />
         <UnitsSelector units={units} onUnitsChange={setUnits} />
       </nav>
-      <header className="my-8 text-center text-2xl text-white md:text-4xl">
+      <header className="my-8 text-center text-2xl font-semibold leading-tight text-white sm:text-3xl md:text-4xl">
         <h1>How&apos;s the sky looking today?</h1>
       </header>
 
@@ -354,21 +359,31 @@ const WeatherPage: React.FC = () => {
           {/* Main weather grid */}
           <div className="grid gap-6">
             <InfoCard className='relative overflow-hidden text-center text-white'>
-              <img
+              {/* <img
                 src={BgTodayLarge}
                 alt=""
                 className='absolute inset-0 h-full w-full object-cover'
-              />
-              <div className='relative z-10 flex flex-col gap-6 px-2 py-12 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left'>
+              /> */}
+              <picture>
+                <source media='(min-width: 640px)' srcSet={BgTodayLarge} />
+                <img
+                  src={BgTodaySmall}
+                  alt=""
+                  className='absolute inset-0 h-full w-full object-cover'
+                />
+              </picture>
+              <div className='relative z-10 flex flex-col gap-6 px-2 py-10 text-center sm:flex-row sm:items-start sm:justify-between sm:py-12 sm:text-left'>
                 <div>
-                  <p className='text-lg font-bold opacity-80'>{currentWeather?.city}, {currentWeather?.country}</p>
-                  <p className='text-xs opacity-70'>{currentWeather?.date}</p>
+                  <p className='text-base font-bold opacity-80 sm:text-lg'>
+                    {currentWeather?.city}, {currentWeather?.country}
+                  </p>
+                  <p className='text-xs opacity-70 sm:text-sm'>{currentWeather?.date}</p>
                 </div>
-                <div className='flex justify-center items-center gap-8'>
+                <div className='flex justify-center items-center gap-4 sm:gap-6 md:gap-8'>
                   <img
                     src={weatherIcons[currentWeather.condition]}
                     alt={currentWeather.condition}
-                    className='w-20 h-20'
+                    className='h-16 w-16 sm:w-20 sm:h-20'
                   />
                   <h2 className='text-4xl font-semibold leading-none italic sm:text-5xl'>
                     {currentWeather?.temp}
@@ -385,7 +400,7 @@ const WeatherPage: React.FC = () => {
           {/* Hourly forecast grid */}
           <InfoCard className="grid">
             <div className='flex items-center justify-between gap-4 py-4'>
-              <h3 className='text-sm font-semibold'>Hourly forecast</h3>
+              <h3 className='text-sm font-semibold sm:text-base'>Hourly forecast</h3>
               <HourlyDaySelector
                 dailyForecast={dailyForecast}
                 selectedDay={selectedDay}

@@ -18,7 +18,7 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 
 	const baseOptionClass =
-		'flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm transition';
+		'flex w-full items-center justify-between rounded px-2.5 py-1.5 text-left text-xs transition sm:py-2 sm:text-sm ';
 	const activeOptionClass = 'bg-[hsl(243,27%,20%)] text-white';
 	const inactiveOptionClass = 'text-white/70 hover:bg-white/10';
 
@@ -74,30 +74,32 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 				<button
 					type='button'
 					onClick={() => setIsOpen((prev) => !prev)}
-					className='flex items-center gap-2 rounded bg-[hsl(243,27%,20%)] px-2 py-1 text-white'
+					className='flex items-center gap-1.5 rounded bg-[hsl(243,27%,20%)] px-2 py-1 text-xs text-white sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-sm'
 				>
-					<img src={SettingsIcon} alt="" className='h-4 w-4'/>
+					<img src={SettingsIcon} alt="" className='h-3.5 w-3.5 sm:h-4 sm:w-4'/>
 					<span>Units</span>
 					<img
 						src={DropdownIcon}
 						alt=""
-						className={`h-3 w-3 transition-transform ${
+						className={`h-2.5 w-2.5 sm:h-3 sm:w-3 transition-transform ${
 							isOpen ? 'rotate-180' : ''
 						}`}
 					/>
 				</button>
 
 				{isOpen && (
-					<div className='absolute right-0 z-20 mt-2 w-72 rounded-xl bg-[hsl(243,27%,16%)] p-4 text-white shadow-lg'>
-						<p className='mb-4 text-sm font-semibold'>Switch to Imperial</p>
+					<div className='absolute right-0 z-20 mt-2 w-44 rounded-lg bg-[hsl(243,27%,16%)] p-3 text-white shadow-lg sm:w-48 sm:rounded-xl sm:p-4'>
+						<p className='mb-1 text-xs font-semibold sm:mb-2 sm:text-sm'>
+							Switch to Imperial
+						</p>
 
 						{sections.map((section) => (
-							<div key={section.title} className='mb-4 last:mb-0'>
-								<h4 className='mb-2 text-xs tracking-wide text-white/60'>
+							<div key={section.title} className='mb-2 last:mb-0'>
+								<h4 className='mb-1.5 text-[11px] tracking-wide text-white/60 sm:mb-2 sm:text-xs'>
 									{section.title}
 								</h4>
 
-								<div className='grid gap-2'>
+								<div className='grid'>
 									{section.options.map((option) => {
 										const isActive = units[section.key] === option.value;
 
@@ -120,7 +122,7 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 													<img
 														src={CheckMark} 
 														alt=""
-														className='w-3 h-3'
+														className='h-2.5 w-2.5 sm:h-3 sm:w-3'
 													/>
 												)}
 											</button>
