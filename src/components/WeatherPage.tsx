@@ -129,6 +129,7 @@ const WeatherPage: React.FC = () => {
     try {
       setIsLoadingWeather(true);
       setWeatherError('');
+      // throw new Error('Testing weather error state');
 
       const params = new URLSearchParams({
         latitude: String(latitude),
@@ -315,6 +316,7 @@ const WeatherPage: React.FC = () => {
   //     />
   //   )
   // }
+  const showWeatherError = weatherError && selectedLocation;
   return (
     <div className='px-4 py-4 md:px-6 lg:px-20'>
       <nav className="flex items-center justify-between py-3 md:p-4">
@@ -325,16 +327,20 @@ const WeatherPage: React.FC = () => {
         />
         <UnitsSelector units={units} onUnitsChange={setUnits} />
       </nav>
-      <header className="my-8 text-center text-2xl font-semibold leading-tight text-white sm:text-3xl md:text-4xl">
-        <h1>How&apos;s the sky looking today?</h1>
-      </header>
+      {!showWeatherError && (
+        <>
+          <header className="my-8 text-center text-3xl font-semibold leading-tight text-white sm:text-4xl md:text-5xl">
+            <h1>How&apos;s the sky looking today?</h1>
+          </header>
 
-      <SearchBar
-        query={query}
-        onQueryChange={setQuery}
-        onSearch={handleSearch}
-        isSearching={isSearching}
-      />
+          <SearchBar
+            query={query}
+            onQueryChange={setQuery}
+            onSearch={handleSearch}
+            isSearching={isSearching}
+          />
+        </>
+      )}
 
       {searchError && (
         <p className='mt-6 font-semibold text-white text-center'>
@@ -344,7 +350,7 @@ const WeatherPage: React.FC = () => {
       {/* {weatherError && <p className='mt-6 font-semibold text-white text-center'>{weatherError}</p>} */}
       {isLoadingWeather ? (
         <WeatherSkeleton />
-      ) : weatherError && selectedLocation ? (
+      ) : showWeatherError ? (
         <div className='mt-16 flex justify-center'>
           <ErrorState
             title="Something went wrong"
