@@ -93,7 +93,7 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 							Switch to Imperial
 						</p>
 
-						{sections.map((section) => (
+						{sections.map((section, index) => (
 							<div key={section.title} className='mb-2 last:mb-0'>
 								<h4 className='mb-1.5 text-[11px] tracking-wide text-white/60 sm:mb-2 sm:text-xs'>
 									{section.title}
@@ -129,6 +129,9 @@ const UnitsSelector: React.FC<UnitsSelectorProps> = ({
 										);
 									})}
 								</div>
+								{index !== sections.length - 1 && (
+									<hr className='my-2 border-t border-white/10' />
+								)}
 							</div>
 						))}
 					</div>

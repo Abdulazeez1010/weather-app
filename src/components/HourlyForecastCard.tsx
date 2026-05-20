@@ -9,11 +9,11 @@ type HourlyForecastCardProps = {
 
 const HourlyForecastCard: React.FC <HourlyForecastCardProps> = ({ hourlyForecast }) => {
 	return (
-		<div className="grid gap-2 md:p-2">
+		<div className="grid md:min-h-[400px] content-start gap-2 md:p-2">
 			{hourlyForecast.map((time) => (
 				<InfoCard 
 					key={time.hour}
-					className="flex items-center justify-between rounded-sm bg-[hsl(243,27%,30%)] px-3 py-2"
+					className="flex items-center justify-between border border-white/10 rounded-sm bg-[hsl(243,27%,24%)] px-3 py-2"
 				>
 					<div className="flex items-center gap-2">
 						<img

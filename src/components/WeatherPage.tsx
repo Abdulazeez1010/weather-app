@@ -53,6 +53,7 @@ const WeatherPage: React.FC = () => {
     current: CurrentWeather;
     daily: DailyForecastItem[];
     hourly: HourlyForecastItem[];
+    currentDateTime: string;
   }>(null);
 
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
@@ -77,6 +78,7 @@ const WeatherPage: React.FC = () => {
     current: CurrentWeather;
     daily: DailyForecastItem[];
     hourly: HourlyForecastItem[];
+    currentDateTime: string;
   } => {
     const current: CurrentWeather = {
       city: location.name,
@@ -117,7 +119,12 @@ const WeatherPage: React.FC = () => {
         temp: `${Math.round(data.hourly.temperature_2m[index])}${temperatureSymbol}`,
       }));
     
-    return {current, daily, hourly};
+    return {
+      current,
+      daily,
+      hourly,
+      currentDateTime: data.current.time,
+    };
   };
 
 
@@ -284,18 +291,27 @@ const WeatherPage: React.FC = () => {
 
     if (!dayHourlyForecast.length) return [];
 
-    const today = new Date().toISOString().split('T')[0];
+    // const today = new Date().toISOString().split('T')[0];
+    const today = weatherData?.currentDateTime.split('T')[0]
 
     if (selectedDay !== today) {
       return dayHourlyForecast.slice(0, 8);
     }
 
-    const now = new Date();
+    // const now = new Date();
+
+    // const startIndex = dayHourlyForecast.findIndex((item) => {
+    //   const itemDate = new Date(item.dateTime);
+    //   return itemDate >= now;
+    // });
+
+    const currentDateTime = weatherData?.currentDateTime;
+
+    if (!currentDateTime) return dayHourlyForecast.slice(0, 8);
 
     const startIndex = dayHourlyForecast.findIndex((item) => {
-      const itemDate = new Date(item.dateTime);
-      return itemDate >= now;
-    });
+      return item.dateTime > currentDateTime;
+    })
 
     if (startIndex === -1) {
       return dayHourlyForecast.slice(-8);
@@ -306,16 +322,6 @@ const WeatherPage: React.FC = () => {
 
   const visibleHourlyForecast = getVisibleHourlyForecast();
 
-  // if (weatherError && selectedLocation){
-  //   return (
-  //     <ErrorState
-  //       title="Something went wrong"
-  //       message="We couldn't connect to the server (API error). Please try again in a few moments."
-  //       actionLabel="Retry"
-  //       onAction={handleRetryWeather}
-  //     />
-  //   )
-  // }
   const showWeatherError = weatherError && selectedLocation;
   return (
     <div className='px-4 py-4 md:px-6 lg:px-20'>
@@ -404,7 +410,7 @@ const WeatherPage: React.FC = () => {
           </div>
 
           {/* Hourly forecast grid */}
-          <InfoCard className="grid">
+          <InfoCard className="grid bg-[hsl(243,27%,20%)]">
             <div className='flex items-center justify-between gap-4 py-4'>
               <h3 className='text-sm font-semibold sm:text-base'>Hourly forecast</h3>
               <HourlyDaySelector

@@ -16,7 +16,7 @@ const HourlyDaySelector: React.FC<HourlyDaySelectorProps> = ({
 	onSelectedDayChange,
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const containerRef = useRef<HTMLElement | null>(null);
+	const containerRef = useRef<HTMLDivElement | null>(null);
 
 	const selectedForecstDay = dailyForecast.find(
 		(day) => day.date === selectedDay
