@@ -185,6 +185,7 @@ const WeatherPage: React.FC = () => {
       const mapped = mapWeatherData(data, location);
 
       setWeatherData(mapped);
+      setSelectedDay(mapped.daily[0]?.date ?? '');
       // console.log(mapped);
 
     } catch (error) {
@@ -257,6 +258,71 @@ const WeatherPage: React.FC = () => {
     });
   };
 
+  const getLocationNameFromCoords = async (
+    latitude: number,
+    longitude: number
+  ) => {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to reverse geocode location');
+    }
+
+    const data = await response.json();
+    const address = data.address ?? {};
+
+    return {
+      name:
+        address.city ??
+        address.town ??
+        address.village ??
+        address.county ??
+        'Current location',
+      country: address.country ?? '',
+    };
+  };
+
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const detectCurrentLocation = () => {
+    if (!navigator.geolocation) return;
+
+    setIsDetectingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const {latitude, longitude} = position.coords;
+
+        const location = await getLocationNameFromCoords(latitude, longitude);
+
+        setSelectedLocation({
+          name: location.name,
+          country: location.country,
+          latitude,
+          longitude,
+        });
+
+        setIsDetectingLocation(false);
+      },
+      (error) => {
+        console.log('Geolocation error:', error);
+        setIsDetectingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 1000 * 60 * 10,
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (selectedLocation) return;
+
+    detectCurrentLocation();
+  }, []);
+
 
   useEffect(() => {
     if (!selectedLocation) return;
@@ -271,10 +337,10 @@ const WeatherPage: React.FC = () => {
     );
   }, [selectedLocation, units]);
 
-  useEffect(() => {
-    if (!weatherData?.daily.length) return;
-    setSelectedDay(weatherData.daily[0].date);
-  }, [weatherData])
+  // useEffect(() => {
+  //   if (!weatherData?.daily.length) return;
+  //   setSelectedDay(weatherData.daily[0].date);
+  // }, [weatherData])
 
   const currentWeather = weatherData?.current;
   const dailyForecast = weatherData?.daily ?? [];
@@ -354,7 +420,7 @@ const WeatherPage: React.FC = () => {
         </p>
       )}
       {/* {weatherError && <p className='mt-6 font-semibold text-white text-center'>{weatherError}</p>} */}
-      {isLoadingWeather ? (
+      {isDetectingLocation || isLoadingWeather ? (
         <WeatherSkeleton />
       ) : showWeatherError ? (
         <div className='mt-16 flex justify-center'>
