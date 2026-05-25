@@ -21,6 +21,7 @@ import type {
   HourlyForecastItem,
   WeatherCondition,
   UnitsState,
+  SavedLocation,
 } from '../types/weather'
 
 import './WeatherPage.css';
@@ -67,9 +68,18 @@ const WeatherPage: React.FC = () => {
     precipitation: 'mm',
   });
 
+  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>(() => {
+    const saved = localStorage.getItem('savedLocations');
+    return saved ? JSON.parse(saved) : [];
+  })
+
   const temperatureSymbol = units.temperature === 'celsius' ? '°C' : '°F';
   const windUnitLabel = units.windspeed === 'kmh' ? 'km/h' : 'mph';
   const precipitationUnitLabel = units.precipitation === 'mm' ? 'mm' : 'in';
+
+  const currentWeather = weatherData?.current;
+  const dailyForecast = weatherData?.daily ?? [];
+  const hourlyForecast = weatherData?.hourly ?? [];
 
   const mapWeatherData = (
     data: any,
@@ -317,6 +327,54 @@ const WeatherPage: React.FC = () => {
     );
   };
 
+  const isCurrentLocationSaved = currentWeather
+    ? savedLocations.some(
+      (location) =>
+        location.name === currentWeather.city &&
+        location.country === currentWeather.country
+      )
+    : false;
+  
+  const handleSaveLocation = () => {
+    if (!selectedLocation) return;
+
+    const alreadySaved = savedLocations.some(
+      (location) =>
+        location.name === selectedLocation.name &&
+        location.country === selectedLocation.country
+    );
+
+    if (alreadySaved) return;
+
+    setSavedLocations((prev) => [
+      ...prev,
+      {
+        name: selectedLocation.name,
+        country: selectedLocation.country,
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+      },
+    ]);
+  };
+
+  const handleRemoveLocation = (locationToRemove: SavedLocation) => {
+    setSavedLocations((prev) =>
+      prev.filter(
+        (location) =>
+          !(
+            location.name === locationToRemove.name &&
+            location.country === locationToRemove.country
+          )
+      )
+    );
+  };
+
+  const handleSelectSavedLocation = (location: SavedLocation) => {
+    setSelectedLocation(location);
+    setWeatherError('');
+    setSearchError('');
+  };
+
   useEffect(() => {
     if (selectedLocation) return;
 
@@ -337,14 +395,14 @@ const WeatherPage: React.FC = () => {
     );
   }, [selectedLocation, units]);
 
+  useEffect(() => {
+    localStorage.setItem('savedLocations', JSON.stringify(savedLocations));
+  }, [savedLocations])
+
   // useEffect(() => {
   //   if (!weatherData?.daily.length) return;
   //   setSelectedDay(weatherData.daily[0].date);
   // }, [weatherData])
-
-  const currentWeather = weatherData?.current;
-  const dailyForecast = weatherData?.daily ?? [];
-  const hourlyForecast = weatherData?.hourly ?? [];
 
   // const dayHourlyForecast = hourlyForecast.filter(
   //   (item) => item.date === selectedDay
@@ -411,6 +469,21 @@ const WeatherPage: React.FC = () => {
             onSearch={handleSearch}
             isSearching={isSearching}
           />
+
+          {savedLocations.length > 0 && (
+            <div className='mx-auto mt-4 flex max-w-2xl flex-wrap justify-center gap-2 text-white'>
+              {savedLocations.map((location) => (
+                <button
+                  key={`${location.name}-${location.country}`}
+                  type='button'
+                  onClick={() => handleSelectSavedLocation(location)}
+                  className='rounded-full bg-[hsl(243,27%,20%)] px-3 py-1.5 text-xs text-white/80 hover:bg-[hsl(243,27%,30%)]'
+                >
+                  {location.name}, {location.country}
+                </button>
+              ))}
+            </div>
+          )}
         </>
       )}
 
@@ -456,6 +529,13 @@ const WeatherPage: React.FC = () => {
                     {currentWeather?.city}, {currentWeather?.country}
                   </p>
                   <p className='text-xs opacity-70 sm:text-sm'>{currentWeather?.date}</p>
+                  <button
+                    type='button'
+                    onClick={isCurrentLocationSaved ? () => handleRemoveLocation(selectedLocation!) : handleSaveLocation}
+                    className='mt-3 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white hover:bg-white/25'
+                  >
+                    {isCurrentLocationSaved ? 'Saved' : 'Save location'}
+                  </button>
                 </div>
                 <div className='flex justify-center items-center gap-4 sm:gap-6 md:gap-8'>
                   <img

@@ -53,3 +53,10 @@ export type ErrorStateProps = {
   actionLabel: string;
   onAction: () => void;
 }
+
+export type SavedLocation = {
+  name: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+}
