@@ -327,21 +327,27 @@ const WeatherPage: React.FC = () => {
     );
   };
 
-  const isCurrentLocationSaved = currentWeather
-    ? savedLocations.some(
-      (location) =>
-        location.name === currentWeather.city &&
-        location.country === currentWeather.country
-      )
-    : false;
+  const isSameLocation = (
+    locationA: SavedLocation,
+    locationB: SavedLocation
+  ) => {
+    return (
+      Math.abs(locationA.latitude - locationB.latitude) < 0.01 &&
+      Math.abs(locationA.longitude - locationB.longitude) < 0.01
+    );
+  };
+
+  const isCurrentLocationSaved =
+    selectedLocation !== null &&
+    savedLocations.some((location) =>
+        isSameLocation(location, selectedLocation)
+      );
   
   const handleSaveLocation = () => {
     if (!selectedLocation) return;
 
-    const alreadySaved = savedLocations.some(
-      (location) =>
-        location.name === selectedLocation.name &&
-        location.country === selectedLocation.country
+    const alreadySaved = savedLocations.some((location) =>
+        isSameLocation(location, selectedLocation)
     );
 
     if (alreadySaved) return;
@@ -359,13 +365,7 @@ const WeatherPage: React.FC = () => {
 
   const handleRemoveLocation = (locationToRemove: SavedLocation) => {
     setSavedLocations((prev) =>
-      prev.filter(
-        (location) =>
-          !(
-            location.name === locationToRemove.name &&
-            location.country === locationToRemove.country
-          )
-      )
+      prev.filter((location) =>!isSameLocation(location, locationToRemove))
     );
   };
 
